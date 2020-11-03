@@ -80,7 +80,6 @@ private:
 		void scanNextToken();
 
 		soltest::Token currentToken() { return m_currentToken; }
-		std::string currentTokenName() { return soltest::formatToken(m_currentToken); }
 		std::string currentLiteral() { return m_currentLiteral; }
 
 		std::string scanComment();
