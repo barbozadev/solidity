@@ -117,7 +117,7 @@ private:
 		std::string::const_iterator m_char;
 
 		std::string m_currentLiteral;
-		soltest::Token m_currentToken;
+		soltest::Token m_currentToken = soltest::Token::Unknown;
 	};
 
 	bool accept(soltest::Token _token, bool const _expect = false);

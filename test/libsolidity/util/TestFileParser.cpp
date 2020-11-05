@@ -507,6 +507,8 @@ void TestFileParser::Scanner::scanNextToken()
 		m_currentLiteral = _literal;
 	};
 
+	m_currentToken = Token::Unknown;
+	m_currentLiteral = "";
 	do
 	{
 		switch(current())
