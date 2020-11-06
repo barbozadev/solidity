@@ -2975,8 +2975,12 @@ string YulUtilFunctions::arrayConversionFunction(ArrayType const& _from, ArrayTy
 							converted := <arrayStorageToMem>(value)
 						</fromStorage>
 						<?fromCalldata>
-							converted := <allocateMemoryArray>(length)
-							<copyToMemory>(value, add(converted, 0x20), length)
+							converted := <allocateMemoryArray>(<length>)
+							<copyToMemory>(
+								value,
+								<?fromCalldataDynamic>add(converted, 0x20)<!fromCalldataDynamic>converted</fromCalldataDynamic>,
+								mul(<length>, <sizeInBytes>)
+							)
 						</fromCalldata>
 					</toMemory>
 
@@ -3009,11 +3013,10 @@ string YulUtilFunctions::arrayConversionFunction(ArrayType const& _from, ArrayTy
 			if (_from.location() == DataLocation::CallData)
 			{
 				solUnimplementedAssert(!_from.baseType()->isDynamicallyEncoded(), "");
-				solUnimplementedAssert(_from.isByteArray() && _to.isByteArray(), "");
-				solUnimplementedAssert(_to.isDynamicallySized(), "");
-
+				templ("length", _from.isDynamicallySized() ? "length" : _from.length().str());
 				templ("allocateMemoryArray", allocateMemoryArrayFunction(_to));
-				templ("copyToMemory", copyToMemoryFunction(_from.location() == DataLocation::CallData));
+				templ("copyToMemory", copyToMemoryFunction(true));
+				templ("sizeInBytes", _from.baseType()->memoryDataSize().str());
 			}
 			else if (_from.location() == DataLocation::Storage)
 				templ("arrayStorageToMem", copyArrayFromStorageToMemoryFunction(_from, _to));
