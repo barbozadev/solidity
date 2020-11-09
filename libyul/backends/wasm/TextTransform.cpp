@@ -23,6 +23,7 @@
 
 #include <libyul/Exceptions.h>
 
+#include <libsolutil/CommonData.h>
 #include <libsolutil/StringUtils.h>
 #include <libsolutil/Visitor.h>
 
@@ -41,14 +42,21 @@ string TextTransform::run(wasm::Module const& _module)
 	string ret = "(module\n";
 	for (auto const& sub: _module.subModules)
 		ret +=
-			"    ;; sub-module \"" +
+			"    ;; custom section for sub-module\n"
+			"    ;; (@custom \"" +
 			sub.first +
-			"\" will be encoded as custom section in binary here, but is skipped in text mode.\n";
+			"\" \"" +
+			// Transform text representation to hex string to avoid dealing with new lines.
+			toHex(asBytes(run(sub.second))) +
+			"\")\n";
 	for (auto const& data: _module.customSections)
 		ret +=
-			"    ;; custom-section \"" +
+			"    ;; custom section for data\n"
+			"    ;; (@custom \"" +
 			data.first +
-			"\" will be encoded as custom section in binary here, but is skipped in text mode.\n";
+			"\" \"" +
+			toHex(data.second) +
+			"\")\n";
 	for (wasm::FunctionImport const& imp: _module.imports)
 	{
 		ret += "    (import \"" + imp.module + "\" \"" + imp.externalName + "\" (func $" + imp.internalName;

@@ -9,8 +9,10 @@ object "a" {
 // ----
 // Text:
 // (module
-//     ;; sub-module "sub" will be encoded as custom section in binary here, but is skipped in text mode.
-//     ;; custom-section "str" will be encoded as custom section in binary here, but is skipped in text mode.
+//     ;; custom section for sub-module
+//     ;; (@custom "sub" "286d6f64756c650a20202020286d656d6f727920246d656d6f727920286578706f727420226d656d6f727922292031290a20202020286578706f727420226d61696e22202866756e6320246d61696e29290a0a2866756e6320246d61696e0a2020202028626c6f636b20246c6162656c5f0a20202020202020202864726f7020286936342e636f6e737420313129290a20202020290a290a0a290a")
+//     ;; custom section for data
+//     ;; (@custom "str" "48656c6c6f2c20576f726c6421")
 //     (memory $memory (export "memory") 1)
 //
 // )
