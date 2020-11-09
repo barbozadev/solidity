@@ -909,25 +909,6 @@ string YulUtilFunctions::overflowCheckedExpLoopFunction()
 	});
 }
 
-string YulUtilFunctions::extractByteArrayLengthFunction()
-{
-	string functionName = "extract_byte_array_length";
-	return m_functionCollector.createFunction(functionName, [&]() {
-		Whiskers w(R"(
-			function <functionName>(data) -> length {
-				// Retrieve length both for in-place strings and off-place strings:
-				// Computes (x & (0x100 * (ISZERO (x & 1)) - 1)) / 2
-				// i.e. for short strings (x & 1 == 0) it does (x & 0xff) / 2 and for long strings it
-				// computes (x & (-1)) / 2, which is equivalent to just x / 2.
-				let mask := sub(mul(0x100, iszero(and(data, 1))), 1)
-				length := div(and(data, mask), 2)
-			}
-		)");
-		w("functionName", functionName);
-		return w.render();
-	});
-}
-
 string YulUtilFunctions::arrayLengthFunction(ArrayType const& _type)
 {
 	string functionName = "array_length_" + _type.identifier();
@@ -966,6 +947,29 @@ string YulUtilFunctions::arrayLengthFunction(ArrayType const& _type)
 				w("extractByteArrayLength", extractByteArrayLengthFunction());
 		}
 
+		return w.render();
+	});
+}
+
+string YulUtilFunctions::extractByteArrayLengthFunction()
+{
+	string functionName = "extract_byte_array_length";
+	return m_functionCollector.createFunction(functionName, [&]() {
+		Whiskers w(R"(
+			function <functionName>(data) -> length {
+				let outOfPlaceEncoding := and(data, 1)
+				switch outOfPlaceEncoding
+				case 1 { length := data }
+				default { length := and(data, 0xff) }
+
+				length := div(length, 2)
+				if eq(outOfPlaceEncoding, lt(length, 32)) {
+					<panic>()
+				}
+			}
+		)");
+		w("functionName", functionName);
+		w("panic", panicFunction());
 		return w.render();
 	});
 }

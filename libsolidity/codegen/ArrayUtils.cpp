@@ -1030,16 +1030,7 @@ void ArrayUtils::retrieveLength(ArrayType const& _arrayType, unsigned _stackDept
 		case DataLocation::Storage:
 			m_context << Instruction::SLOAD;
 			if (_arrayType.isByteArray())
-			{
-				// Retrieve length both for in-place strings and off-place strings:
-				// Computes (x & (0x100 * (ISZERO (x & 1)) - 1)) / 2
-				// i.e. for short strings (x & 1 == 0) it does (x & 0xff) / 2 and for long strings it
-				// computes (x & (-1)) / 2, which is equivalent to just x / 2.
-				m_context << u256(1) << Instruction::DUP2 << u256(1) << Instruction::AND;
-				m_context << Instruction::ISZERO << u256(0x100) << Instruction::MUL;
-				m_context << Instruction::SUB << Instruction::AND;
-				m_context << u256(2) << Instruction::SWAP1 << Instruction::DIV;
-			}
+				m_context.callYulFunction(m_context.utilFunctions().extractByteArrayLengthFunction(), 1, 1);
 			break;
 		}
 	}
