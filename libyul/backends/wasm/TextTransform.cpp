@@ -19,11 +19,13 @@
  * Component that transforms internal Wasm representation to text.
  */
 
+#include <libyul/backends/wasm/BinaryTransform.h>
 #include <libyul/backends/wasm/TextTransform.h>
 
 #include <libyul/Exceptions.h>
 
 #include <libsolutil/CommonData.h>
+#include <libsolutil/Keccak256.h>
 #include <libsolutil/StringUtils.h>
 #include <libsolutil/Visitor.h>
 
@@ -43,11 +45,13 @@ string TextTransform::run(wasm::Module const& _module)
 	for (auto const& sub: _module.subModules)
 		ret +=
 			"    ;; custom section for sub-module\n"
+			"    ;; The Keccak-256 hash of the text representation: " +
+			toHex(keccak256(run(sub.second))) +
+			"\n"
 			"    ;; (@custom \"" +
 			sub.first +
 			"\" \"" +
-			// Transform text representation to hex string to avoid dealing with new lines.
-			toHex(asBytes(run(sub.second))) +
+			toHex(BinaryTransform::run(sub.second)) +
 			"\")\n";
 	for (auto const& data: _module.customSections)
 		ret +=
